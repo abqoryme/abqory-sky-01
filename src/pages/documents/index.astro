@@ -1,0 +1,114 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import Navbar from '../../components/Navbar.astro';
+import Sidebar from '../../components/Sidebar.astro';
+import ParticleBackground from '../../components/ParticleBackground.astro';
+import GlowOverlay from '../../components/GlowOverlay.astro';
+import { getCollection } from 'astro:content';
+
+const allDocuments = await getCollection('documents');
+const backgroundImage = "https://raw.githubusercontent.com/abqoryme/astro-cv/refs/heads/main/20260513_140801_0000.png";
+
+
+function getImageUrl(driveId: string) {
+  // Cek jika driveId sudah berupa URL lengkap (dimulai dengan http/https)
+  if (driveId.startsWith('http')) {
+    return driveId;
+  }
+
+  // Jika hanya ID (misal: 1Gqt2t5...), anggap itu Google Drive ID
+  // Format thumbnail Google Drive
+  return `https://drive.google.com/thumbnail?id=${driveId}&sz=w1000`;
+}
+---
+
+<Layout title="DOCUMENTS | Ahmad Abqory Mudabighi">
+	<main class="relative min-h-screen w-full flex flex-col items-center overflow-hidden">
+		<ParticleBackground backgroundImage={backgroundImage} />
+		<GlowOverlay />
+		<Navbar />
+		<Sidebar />
+
+		<section class="relative z-10 w-full max-w-7xl px-6 lg:px-24 py-32">
+			<!-- Header -->
+			<div class="mb-16 animate-fade-in">
+				<h1 class="text-6xl lg:text-8xl font-serif leading-none mb-4 text-glow">DOCU<span class="text-white/40">MENTS</span></h1>
+				<p class="text-xs font-bold tracking-[0.5em] uppercase text-white/40">Collection of Certifications & Files</p>
+			</div>
+
+			<!-- Grid -->
+			<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 animate-fade-in" style="animation-delay: 0.2s;">
+				{allDocuments.map((doc) => (
+					<a 
+						href={doc.data.driveUrl} 
+						target="_blank" 
+						rel="noopener noreferrer"
+						class="glass-card group flex flex-col overflow-hidden transition-all duration-500 hover:scale-[1.02] hover:-translate-y-2 active:scale-95"
+					>
+						<!-- Thumbnail Container -->
+						<div class="relative w-full aspect-video overflow-hidden bg-white/5">
+							<!-- Google Drive Thumbnail -->
+							<img 
+ 							 src={getImageUrl(doc.data.driveId)} 
+ 							 alt={doc.data.title}
+  							 class="w-full h-full object-cover opacity-60 group-hover:opacity-100 transition-opacity duration-500 scale-105 group-hover:scale-100 transition-transform duration-700"
+ 							 loading="lazy"
+							/>
+							<!-- Overlay Icon -->
+							<div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-black/20 backdrop-blur-sm">
+								<svg class="w-12 h-12 text-white/80" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+								</svg>
+							</div>
+							<!-- Category Badge -->
+							<div class="absolute top-4 right-4 px-3 py-1 glass rounded-full text-[10px] font-bold tracking-widest uppercase text-white/60">
+								{doc.data.category}
+							</div>
+						</div>
+
+						<!-- Content -->
+						<div class="p-6 flex-1 flex flex-col">
+							<div class="flex items-center justify-between mb-3">
+								<span class="text-[10px] text-white/40 font-bold tracking-widest uppercase">{doc.data.date}</span>
+								<div class="flex gap-1">
+									<div class="w-1 h-1 bg-white/20 rounded-full"></div>
+									<div class="w-1 h-1 bg-white/40 rounded-full"></div>
+									<div class="w-1 h-1 bg-white/60 rounded-full"></div>
+								</div>
+							</div>
+							<h3 class="text-lg font-bold tracking-wide mb-3 group-hover:text-glow transition-all duration-300 uppercase">{doc.data.title}</h3>
+							<p class="text-xs text-white/50 leading-relaxed mb-6 flex-1 italic">
+								{doc.data.description}
+							</p>
+							
+							<!-- Tags -->
+							<div class="flex flex-wrap gap-2">
+								{doc.data.tags?.map((tag) => (
+									<span class="text-[8px] px-2 py-0.5 border border-white/10 rounded-full text-white/30 uppercase tracking-widest">
+										#{tag}
+									</span>
+								))}
+							</div>
+						</div>
+					</a>
+				))}
+
+				<!-- Add New Placeholder Card (Visual only) -->
+				<div class="glass-card flex flex-col items-center justify-center p-12 border-dashed border-white/5 opacity-40 group cursor-default">
+					<div class="w-16 h-16 rounded-full border border-white/10 flex items-center justify-center mb-4 group-hover:border-white/20 transition-all">
+						<svg class="w-8 h-8 text-white/20 group-hover:text-white/40 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+						</svg>
+					</div>
+					<p class="text-[10px] tracking-[0.3em] uppercase text-center leading-loose">Add new document via .md file</p>
+				</div>
+			</div>
+		</section>
+	</main>
+</Layout>
+
+<style>
+	.text-glow {
+		text-shadow: 0 0 30px rgba(255, 255, 255, 0.3);
+	}
+</style>

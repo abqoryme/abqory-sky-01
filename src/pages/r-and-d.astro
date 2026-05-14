@@ -1,0 +1,163 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Navbar from '../components/Navbar.astro';
+import Sidebar from '../components/Sidebar.astro';
+import ParticleBackground from '../components/ParticleBackground.astro';
+import GlowOverlay from '../components/GlowOverlay.astro';
+import Buttons from '../components/Buttons.astro';
+import { getCollection } from 'astro:content';
+
+const rdItems = await getCollection('rd');
+const items = rdItems.sort((a, b) => new Date(b.data.date).getTime() - new Date(a.data.date).getTime());
+
+function badgeClass(type: string) {
+  switch (type) {
+    case 'project':
+      return 'bg-emerald-500/15 text-emerald-200 border border-emerald-200/10';
+    case 'tool':
+      return 'bg-sky-500/10 text-sky-200 border border-sky-200/10';
+    case 'development':
+      return 'bg-yellow-500/10 text-yellow-200 border border-yellow-200/10';
+    case 'artifact':
+      return 'bg-violet-500/10 text-violet-200 border border-violet-200/10';
+    default:
+      return 'bg-white/10 text-white/80 border border-white/10';
+  }
+}
+---
+
+<Layout title="R&D | Ahmad Abqory Mudabighi">
+	<main class="relative min-h-screen w-full flex flex-col items-center overflow-hidden">
+		<ParticleBackground backgroundImage="https://raw.githubusercontent.com/abqoryme/astro-cv/refs/heads/main/20260513_140801_0000.png" />
+		<GlowOverlay />
+		<Navbar />
+		<Sidebar />
+
+		<section class="relative z-10 w-full max-w-7xl px-6 lg:px-24 py-32">
+			<div class="mb-14 animate-fade-in">
+				<span class="text-xs font-bold tracking-[0.5em] uppercase text-white/40">R&D ARCHIVE</span>
+				<h1 class="text-6xl lg:text-8xl font-serif leading-none mt-4 text-glow">R&amp;D</h1>
+				<p class="max-w-3xl text-sm lg:text-base text-white/60 mt-6 leading-relaxed">
+					My research and development projects.
+				</p>
+				<div class="mt-6 flex flex-wrap gap-3">
+					<span class="px-3 py-1 rounded-full border border-white/10 text-[10px] uppercase tracking-[0.45em] text-white/40">projects</span>
+					<span class="px-3 py-1 rounded-full border border-white/10 text-[10px] uppercase tracking-[0.45em] text-white/40">tools</span>
+					<span class="px-3 py-1 rounded-full border border-white/10 text-[10px] uppercase tracking-[0.45em] text-white/40">developments</span>
+                    <span class="px-3 py-1 rounded-full border border-white/10 text-[10px] uppercase tracking-[0.45em] text-white/40">research</span>
+				</div>
+			</div>
+
+			<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 animate-fade-in" style="animation-delay: 0.2s;">
+				{items.map((item) => {
+					const card = (
+						<div class="glass-card group overflow-hidden border border-white/10 shadow-[0_20px_80px_rgba(0,0,0,0.3)] transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_30px_120px_rgba(0,0,0,0.4)]">
+							<div class="relative aspect-video overflow-hidden bg-black/40">
+								<img
+									src={item.data.thumbnail}
+									alt={item.data.title}
+									class="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity duration-700"
+									loading="lazy"
+								/>
+								<div class="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(138,255,145,0.18),_transparent_45%)] mix-blend-screen pointer-events-none"></div>
+								<div class="absolute top-4 right-4 px-3 py-1 rounded-full text-[10px] uppercase tracking-[0.35em] text-white/80 bg-black/30 backdrop-blur-sm">
+									{item.data.category}
+								</div>
+								<div class="absolute bottom-4 left-4 px-3 py-1 rounded-full text-[10px] uppercase tracking-[0.35em] {badgeClass(item.data.type)}">
+									{item.data.type}
+								</div>
+							</div>
+
+							<div class="p-6 flex flex-col gap-4">
+								<div class="flex items-center justify-between gap-3">
+									<h2 class="text-xl font-bold tracking-tight text-white group-hover:text-glow transition-all duration-300 uppercase">{item.data.title}</h2>
+									<span class="text-[10px] uppercase tracking-[0.4em] text-white/40">{item.data.date}</span>
+								</div>
+								<p class="text-sm text-white/60 leading-relaxed min-h-[4.5rem]">{item.data.preview ?? item.data.description}</p>
+								<div class="flex flex-wrap gap-2 pt-2">
+									{item.data.tags?.map((tag) => (
+										<span class="px-2 py-1 rounded-full border border-white/10 text-[10px] uppercase tracking-[0.35em] text-white/50">#{tag}</span>
+									))}
+								</div>
+							</div>
+						</div>
+					);
+
+					return item.data.link ? (
+						<a href={item.data.link} target="_blank" rel="noopener noreferrer" class="block">
+							{card}
+						</a>
+					) : (
+						<div class="block">{card}</div>
+					);
+				})}
+			</div>
+
+			<!-- Back to Home Button -->
+			<div class="mt-16 flex items-center justify-center animate-fade-in" style="animation-delay: 0.4s;">
+				<Buttons label="BACK TO HOME" variant="outline" href="/" />
+			</div>
+		</section>
+	</main>
+
+	<!-- Floating Back to Home Button (Android Only) -->
+	<div id="floating-home-btn" class="fixed bottom-6 right-6 z-50 hidden opacity-0 transition-opacity duration-300">
+		<a href="/" class="w-14 h-14 glass rounded-full flex items-center justify-center shadow-2xl border border-white/20 hover:bg-white/10 transition-all duration-300 group">
+			<svg class="w-6 h-6 text-white/80 group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+			</svg>
+		</a>
+	</div>
+</Layout>
+
+<script>
+	// Floating Home Button for Android Only
+	const floatingBtn = document.getElementById('floating-home-btn') as HTMLElement | null;
+	let hideTimeout: number | undefined;
+
+	function showButton() {
+		if (floatingBtn) {
+			floatingBtn.classList.remove('hidden');
+			floatingBtn.classList.add('opacity-100');
+			resetHideTimer();
+		}
+	}
+
+	function hideButton() {
+		if (floatingBtn) {
+			floatingBtn.classList.remove('opacity-100');
+			setTimeout(() => floatingBtn.classList.add('hidden'), 300);
+		}
+	}
+
+	function resetHideTimer() {
+		if (hideTimeout) {
+			clearTimeout(hideTimeout);
+		}
+		hideTimeout = setTimeout(hideButton, 3000); // Hide after 3 seconds of no interaction
+	}
+
+	// Check if Android and show button
+	if (/Android/i.test(navigator.userAgent)) {
+		showButton();
+
+		// Add touch event listeners to reset timer
+		if (floatingBtn) {
+			floatingBtn.addEventListener('touchstart', resetHideTimer);
+			floatingBtn.addEventListener('touchend', resetHideTimer);
+			floatingBtn.addEventListener('touchmove', resetHideTimer);
+		}
+	}
+</script>
+
+<style>
+	.text-glow {
+		text-shadow: 0 0 30px rgba(238, 255, 186, 0.35), 0 0 70px rgba(255, 255, 255, 0.18);
+	}
+
+	.glass-card {
+		background: rgba(12, 14, 20, 0.65);
+		backdrop-filter: blur(18px);
+		border-radius: 2rem;
+	}
+</style>

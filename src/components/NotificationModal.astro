@@ -1,0 +1,124 @@
+---
+import { getCollection } from 'astro:content';
+import { render } from 'astro:content';
+
+const updates = await getCollection('updates');
+// Sort by date descending
+const sortedUpdates = updates.sort((a, b) => new Date(b.data.date).getTime() - new Date(a.data.date).getTime());
+
+const typeColors = {
+  update: 'bg-blue-500/20 text-blue-300 border-blue-500/30',
+  info: 'bg-white/10 text-white/70 border-white/20',
+  important: 'bg-red-500/20 text-red-300 border-red-500/30',
+};
+---
+
+<div id="notif-modal" class="fixed inset-0 z-[200] hidden flex items-center justify-center p-4">
+  <div class="absolute inset-0 bg-black/60 backdrop-blur-md" id="close-notif-bg"></div>
+  
+  <div class="glass-card w-full max-w-xl relative z-10 overflow-hidden animate-fade-in flex flex-col max-h-[80vh]">
+    <!-- Header -->
+    <div class="flex items-center justify-between p-6 border-b border-white/10">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 glass rounded-full flex items-center justify-center text-white/80">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+          </svg>
+        </div>
+        <div>
+          <h3 class="text-sm font-bold tracking-widest uppercase">Pembaruan & Info</h3>
+          <p class="text-[10px] text-white/40 tracking-widest uppercase">System Notifications</p>
+        </div>
+      </div>
+      <button id="close-notif-btn" class="p-2 hover:bg-white/10 rounded-full transition-colors text-white/40 hover:text-white">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+    </div>
+
+    <!-- Content List -->
+    <div class="p-6 overflow-y-auto custom-scrollbar space-y-6">
+      {sortedUpdates.length > 0 ? (
+        sortedUpdates.map(async (update) => {
+          const { Content } = await render(update);
+          return (
+            <div class="space-y-3 pb-6 border-b border-white/5 last:border-0 last:pb-0">
+              <div class="flex items-center justify-between">
+                <span class={`text-[8px] px-2 py-0.5 rounded-full border font-bold tracking-widest uppercase ${typeColors[update.data.type]}`}>
+                  {update.data.type}
+                </span>
+                <span class="text-[10px] text-white/30 font-medium">{update.data.date}</span>
+              </div>
+              <h4 class="text-base font-bold tracking-wide text-white/90">{update.data.title}</h4>
+              <div class="text-sm text-white/60 leading-relaxed font-light prose prose-invert prose-sm max-w-none">
+                <Content />
+              </div>
+            </div>
+          )
+        })
+      ) : (
+        <div class="py-12 text-center">
+          <p class="text-white/20 text-xs tracking-widest uppercase italic">Tidak ada pembaruan saat ini.</p>
+        </div>
+      )}
+    </div>
+  </div>
+</div>
+
+<script is:inline define:vars={{ updateCount: sortedUpdates.length }}>
+  const modal = document.getElementById('notif-modal');
+  const closeBtn = document.getElementById('close-notif-btn');
+  const closeBg = document.getElementById('close-notif-bg');
+  const navDot = document.getElementById('nav-notif-dot');
+  
+  const STORAGE_KEY = 'last_seen_updates_count';
+
+  // Check if there are new updates
+  function checkNewUpdates() {
+    const lastSeenCount = localStorage.getItem(STORAGE_KEY);
+    if (updateCount > 0 && (!lastSeenCount || parseInt(lastSeenCount) < updateCount)) {
+      if (navDot) navDot.classList.remove('hidden');
+    } else {
+      if (navDot) navDot.classList.add('hidden');
+    }
+  }
+
+  window.toggleNotifModal = () => {
+    if (!modal) return;
+    const isHidden = modal.classList.contains('hidden');
+    
+    if (isHidden) {
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      // Mark as seen
+      localStorage.setItem(STORAGE_KEY, updateCount.toString());
+      if (navDot) navDot.classList.add('hidden');
+    } else {
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+  };
+
+  closeBtn?.addEventListener('click', window.toggleNotifModal);
+  closeBg?.addEventListener('click', window.toggleNotifModal);
+
+  // Initial check
+  checkNewUpdates();
+</script>
+
+<style>
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 4px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.02);
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.2);
+  }
+</style>

@@ -1,0 +1,27 @@
+---
+interface Props {
+  variant?: 'primary' | 'outline' | 'ghost';
+  label: string;
+  href?: string;
+}
+
+const { variant = 'primary', label, href } = Astro.props;
+
+const variants = {
+  primary: 'bg-white text-black hover:bg-white/90 shadow-[0_0_20px_rgba(255,255,255,0.2)]',
+  outline: 'bg-transparent border border-white/20 text-white hover:bg-white/5',
+  ghost: 'bg-transparent text-white/60 hover:text-white hover:bg-white/5'
+};
+
+const className = `inline-block px-8 py-3 rounded-full text-xs font-bold tracking-[0.2em] uppercase transition-all duration-300 hover:scale-105 active:scale-95 ${variants[variant]}`;
+---
+
+{href ? (
+  <a href={href} class={className}>
+    {label}
+  </a>
+) : (
+  <button class={className}>
+    {label}
+  </button>
+)}

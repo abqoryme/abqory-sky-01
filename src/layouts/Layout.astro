@@ -1,23 +1,120 @@
+---
+import '../styles/global.css';
+import { ClientRouter } from 'astro:transitions';
+import NotificationModal from '../components/NotificationModal.astro';
+
+interface Props {
+	title?: string;
+}
+
+const { title = "MIGI | Ahmad Abqory Mudabighi" } = Astro.props;
+---
+
 <!doctype html>
 <html lang="en">
 	<head>
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width" />
+		
+		<!-- Favicon Svg -->
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="icon" href="/favicon.ico" />
+
+		<!-- Favicon Ico -->
+		<link rel="alternate icon" type="image/x-icon" href="/favicon.ico" />
+		<link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
+		<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+		<link rel="manifest" href="/site.webmanifest" />
+
 		<meta name="generator" content={Astro.generator} />
-		<title>Astro Basics</title>
+		<!-- Primary SEO Meta Tags -->
+		<meta name="description" content="MIGI - Personal portfolio of Ahmad Abqory Mudabighi, showcasing creative development, design projects, technical expertise in web development, and bonsai enthusiast." />
+		<meta name="keywords" content="Ahmad Abqory Mudabighi, abqory, MIGI, web developer, portfolio, frontend development, creative design, UI/UX, Indonesia" />
+		<meta name="author" content="Ahmad Abqory Mudabighi" />
+		<meta name="robots" content="index, follow" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<link rel="canonical" href="https://abqory.is-a.dev" />
+
+		<!-- Open Graph / Facebook Meta Tags -->
+		<meta property="og:type" content="website" />
+		<meta property="og:url" content="https://abqory.is-a.dev" />
+		<meta property="og:title" content="MIGI | Ahmad Abqory Mudabighi" />
+		<meta property="og:description" content="Personal portfolio of Ahmad Abqory Mudabighi, showcasing creative development, design projects, and technical expertise in web development." />
+		<meta property="og:image" content="https://abqory.is-a.dev/og-preview.png" />
+		<meta property="og:site_name" content="MIGI" />
+		<meta property="og:locale" content="en_US" />
+		<meta property="og:locale" content="id_ID" />
+
+		<!-- Twitter/X Meta Tags -->
+		<meta name="twitter:card" content="summary_large_image" />
+		<meta name="twitter:url" content="https://abqory.is-a.dev" />
+		<meta name="twitter:title" content="MIGI | Ahmad Abqory Mudabighi" />
+		<meta name="twitter:description" content="Personal portfolio of Ahmad Abqory Mudabighi, showcasing creative development, design projects, and technical expertise in web development." />
+		<meta name="twitter:image" content="https://abqory.is-a.dev/og-preview.png" />
+		<meta name="twitter:creator" content="@humanxxx00000" />
+
+		<!-- LinkedIn & Other Social Platforms -->
+		<meta property="linkedin:owner" content="https://www.linkedin.com/in/ahmad-abqory-westjava" />
+		<meta property="instagram:username" content="ahmadabkorimudabig" />
+
+		<!-- Additional SEO Meta Tags -->
+		<meta name="theme-color" content="#0a0a0a" />
+		<meta name="msapplication-TileColor" content="#0a0a0a" />
+		<meta name="msapplication-config" content="/browserconfig.xml" />
+		<meta name="application-name" content="MIGI" />
+		<meta name="apple-mobile-web-app-title" content="MIGI" />
+		<meta name="apple-mobile-web-app-capable" content="yes" />
+		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+		<!-- JSON-LD Structured Data for Google -->
+		<script type="application/ld+json">
+		{
+			"@context": "https://schema.org",
+			"@type": "Person",
+			"name": "Ahmad Abqory Mudabighi",
+			"url": "https://abqory.is-a.dev",
+			"description": "Web developer and creative designer based in Indonesia",
+			"sameAs": [
+				"https://github.com/abqoryme",
+				"https://linkedin.com/in/ahmad-abqory-westjava",
+				"https://twitter.com/humanxxx00000",
+				"https://instagram.com/ahmadabkorimudabig"
+			],
+			"image": "https://abqory.is-a.dev/profile-image.jpg"
+		}
+		</script>
+		
+		<!-- Google Fonts -->
+		<link rel="preconnect" href="https://fonts.googleapis.com">
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+		<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+		
+		<title>{title}</title>
+		<ClientRouter />
 	</head>
-	<body>
+	<body class="bg-deep-black overflow-x-hidden">
+		<!-- Grain Overlay -->
+		<div class="fixed inset-0 grain z-[9999]"></div>
+		
+		<!-- Vignette -->
+		<div class="fixed inset-0 vignette pointer-events-none z-50"></div>
+		
 		<slot />
+
+		<!-- Global Notifications -->
+		<NotificationModal />
 	</body>
 </html>
 
-<style>
-	html,
-	body {
-		margin: 0;
-		width: 100%;
-		height: 100%;
+<style is:global>
+	:root {
+		--accent: 136, 58, 234;
+		--accent-light: 224, 204, 250;
+		--accent-dark: 49, 10, 101;
+		--accent-gradient: linear-gradient(
+			45deg,
+			rgb(var(--accent)),
+			rgb(var(--accent-light)) 30%,
+			white 60%
+		);
 	}
 </style>

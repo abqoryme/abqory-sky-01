@@ -1,0 +1,96 @@
+---
+interface Props {
+  backgroundImage: string;
+}
+
+const { backgroundImage } = Astro.props;
+---
+
+<div class="fixed inset-0 z-0 overflow-hidden pointer-events-none">
+  <!-- Background Image with Depth Blur & Parallax Container -->
+  <div id="parallax-bg" class="absolute inset-0 scale-110">
+    <div 
+      class="absolute inset-0 bg-cover bg-center bg-no-repeat transition-transform duration-500 ease-out"
+      style={`background-image: url('${backgroundImage}'); filter: brightness(0.4) contrast(1.1);`}
+    ></div>
+  </div>
+
+  <!-- Darker Overlay & Radial Glows -->
+  <div class="absolute inset-0 bg-gradient-to-b from-transparent via-black/20 to-black/60"></div>
+  
+  <!-- Animated Light Streaks -->
+  <div class="absolute inset-0 overflow-hidden">
+    <div class="streak streak-1 absolute w-[200%] h-1 bg-white/5 blur-xl -rotate-45 -translate-x-1/2"></div>
+    <div class="streak streak-2 absolute w-[200%] h-1 bg-white/5 blur-xl -rotate-45 -translate-x-1/2"></div>
+  </div>
+
+  <!-- Fog / Smoke Effect -->
+  <div class="absolute bottom-0 left-0 w-full h-1/2 bg-gradient-to-t from-black/40 to-transparent blur-3xl opacity-50 animate-pulse-slow"></div>
+  <div class="fog-container absolute inset-0 overflow-hidden opacity-30 mix-blend-screen">
+    <div class="fog absolute bottom-0 left-0 w-[200%] h-full"></div>
+  </div>
+
+  <!-- Particles (Snow/Dust) -->
+  <div id="particles-container" class="absolute inset-0">
+    {Array.from({ length: 50 }).map((_, i) => (
+      <div 
+        class="particle absolute bg-white rounded-full" 
+        style={`
+          --size: ${Math.random() * 3 + 1}px;
+          --left: ${Math.random() * 100}%;
+          --delay: ${Math.random() * 20}s;
+          --duration: ${Math.random() * 10 + 10}s;
+          --opacity: ${Math.random() * 0.5 + 0.2};
+        `}
+      ></div>
+    ))}
+  </div>
+</div>
+
+<style>
+  .streak-1 { top: 20%; animation: streak 15s linear infinite; }
+  .streak-2 { top: 60%; animation: streak 20s linear infinite; }
+
+  @keyframes streak {
+    from { transform: translateX(-50%) translateY(-100%) rotate(-45deg); }
+    to { transform: translateX(50%) translateY(100%) rotate(-45deg); }
+  }
+
+  .fog {
+    background: radial-gradient(circle at 50% 100%, rgba(255,255,255,0.05) 0%, transparent 70%);
+    animation: fog-move 60s linear infinite;
+  }
+
+  @keyframes fog-move {
+    from { transform: translateX(-50%); }
+    to { transform: translateX(0%); }
+  }
+
+  .particle {
+    width: var(--size);
+    height: var(--size);
+    left: var(--left);
+    top: -10px;
+    opacity: var(--opacity);
+    animation: fall var(--duration) linear var(--delay) infinite;
+  }
+
+  @keyframes fall {
+    0% { transform: translateY(-10px) translateX(0) rotate(0); opacity: 0; }
+    10% { opacity: var(--opacity); }
+    90% { opacity: var(--opacity); }
+    100% { transform: translateY(110vh) translateX(100px) rotate(360deg); opacity: 0; }
+  }
+</style>
+
+<script>
+  // Simple Mouse Parallax
+  const bg = document.getElementById('parallax-bg');
+  window.addEventListener('mousemove', (e) => {
+    const x = (e.clientX / window.innerWidth - 0.5) * 20;
+    const y = (e.clientY / window.innerHeight - 0.5) * 20;
+    if (bg) {
+      bg.style.transform = `translate(${x}px, ${y}px)`;
+    }
+  });
+</script>

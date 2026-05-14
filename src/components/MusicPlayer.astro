@@ -1,0 +1,195 @@
+---
+import { musicPlayerConfig } from '../config/music';
+---
+
+<!-- Modal Background -->
+<div id="music-modal" class="fixed inset-0 z-[200] hidden flex items-center justify-center p-4">
+  <div class="absolute inset-0 bg-black/60 backdrop-blur-md" id="close-modal-bg"></div>
+  
+  <!-- Popup Content -->
+  <div class="glass-card w-full max-w-lg relative z-10 overflow-hidden animate-fade-in shadow-[0_50px_100px_rgba(0,0,0,0.5)]">
+    <!-- Header -->
+    <div class="flex items-center justify-between p-6 border-b border-white/10">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 glass rounded-full flex items-center justify-center text-white/80">
+          <svg class="w-5 h-5 animate-spin-slow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
+          </svg>
+        </div>
+        <div>
+          <h3 class="text-sm font-bold tracking-widest uppercase">Chainsaw Player</h3>
+          <p class="text-[10px] text-white/40 tracking-widest uppercase">Aki's Selection</p>
+        </div>
+      </div>
+      <button id="close-music-btn" class="p-2 hover:bg-white/10 rounded-full transition-colors text-white/40 hover:text-white">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+    </div>
+
+    <!-- Player Container -->
+    <div class="p-6">
+      <div id="aplayer"></div>
+    </div>
+  </div>
+</div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aplayer/dist/APlayer.min.css">
+<script is:inline src="https://cdn.jsdelivr.net/npm/aplayer/dist/APlayer.min.js"></script>
+
+<script is:inline define:vars={{ musicPlayerConfig }}>
+  let ap = null;
+
+  function initPlayer() {
+    if (typeof APlayer === 'undefined') return;
+    
+    ap = new APlayer({
+      container: document.getElementById('aplayer'),
+      ...musicPlayerConfig.player,
+      audio: musicPlayerConfig.local.playlist
+    });
+  }
+
+  // Handle Modal Toggle
+  const modal = document.getElementById('music-modal');
+  const closeBtn = document.getElementById('close-music-btn');
+  const closeBg = document.getElementById('close-modal-bg');
+
+  window.toggleMusicPlayer = () => {
+    if (!modal) return;
+    const isHidden = modal.classList.contains('hidden');
+    
+    if (isHidden) {
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      if (!ap) initPlayer();
+    } else {
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+  };
+
+  window.toggleMute = () => {
+    if (!ap) {
+      initPlayer();
+    }
+    
+    const isMuted = ap.audio.muted;
+    ap.audio.muted = !isMuted;
+    
+    // Dispatch custom event to update UI icons elsewhere
+    window.dispatchEvent(new CustomEvent('music-mute-toggle', { 
+      detail: { muted: !isMuted } 
+    }));
+    
+    return !isMuted;
+  };
+
+  closeBtn?.addEventListener('click', window.toggleMusicPlayer);
+  closeBg?.addEventListener('click', window.toggleMusicPlayer);
+</script>
+
+<style is:global>
+  /* Customizing APlayer to fit the theme */
+  .aplayer {
+    background: transparent !important;
+    box-shadow: none !important;
+    font-family: inherit !important;
+    margin: 0 !important;
+    width: 100% !important;
+  }
+  
+  .aplayer .aplayer-info {
+    padding: 15px 0 !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+    max-height: 120px !important; /* Batasi bagian info agar tidak kepanjangan */
+    overflow: hidden;
+  }
+
+  /* --- PERBAIKAN SCROLL LIST --- */
+  .aplayer .aplayer-list {
+    max-height: 250px !important; 
+    overflow-y: auto !important; /* Wajib ada agar bisa scroll */
+    overflow-x: hidden !important;
+    /* Padding tambahan agar item terakhir tidak tertutup */
+    padding-right: 5px; 
+  }
+
+  /* Custom Scrollbar untuk List Lagu (Gaya Modern) */
+  .aplayer .aplayer-list::-webkit-scrollbar {
+    width: 6px;
+  }
+  .aplayer .aplayer-list::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 3px;
+  }
+  .aplayer .aplayer-list::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 3px;
+  }
+  .aplayer .aplayer-list::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.4);
+  }
+
+  /* Styling List Items */
+  .aplayer .aplayer-list ol li {
+    border-top: 1px solid rgba(255, 255, 255, 0.05) !important;
+    background: transparent !important;
+    color: rgba(255, 255, 255, 0.6) !important;
+    padding: 10px 15px !important; /* Tambah padding agar nyaman diklik */
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  .aplayer .aplayer-list ol li:hover {
+    background: rgba(255, 255, 255, 0.1) !important;
+    color: white !important;
+    transform: translateX(5px); /* Efek geser sedikit saat hover */
+  }
+  .aplayer .aplayer-list ol li.aplayer-list-light {
+    background: rgba(255, 255, 255, 0.15) !important;
+    color: white !important;
+    font-weight: 700 !important;
+  }
+  
+  /* Styling Text */
+  .aplayer .aplayer-list ol li .aplayer-list-title {
+    font-size: 14px;
+  }
+  .aplayer .aplayer-list ol li .aplayer-list-artist {
+    font-size: 12px;
+    opacity: 0.7;
+  }
+  .aplayer .aplayer-list ol li .aplayer-list-index {
+    color: rgba(255, 255, 255, 0.3) !important;
+    font-size: 12px;
+  }
+
+  /* Info Player Styling */
+  .aplayer .aplayer-info .aplayer-music .aplayer-title {
+    color: white !important;
+    font-size: 16px !important;
+    font-weight: 700 !important;
+  }
+  .aplayer .aplayer-info .aplayer-music .aplayer-author {
+    color: rgba(255, 255, 255, 0.4) !important;
+    font-size: 12px !important;
+  }
+
+  /* Progress Bar Styling */
+  .aplayer .aplayer-info .aplayer-controller .aplayer-bar-wrap .aplayer-bar {
+    background: rgba(255, 255, 255, 0.1) !important;
+  }
+  .aplayer .aplayer-info .aplayer-controller .aplayer-bar-wrap .aplayer-bar .aplayer-played {
+    background: white !important;
+  }
+  .aplayer .aplayer-info .aplayer-controller .aplayer-bar-wrap .aplayer-bar .aplayer-played .aplayer-thumb {
+    background: white !important;
+    border: 2px solid #000 !important;
+    box-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
+  }
+  
+  .animate-spin-slow {
+    animation: spin 8s linear infinite;
+  }
+</style>

@@ -6,7 +6,7 @@ interface Props {
 }
 
 const { id, quote, author } = Astro.props;
-const quoteId = id || quote.toLowerCase().replace(/[^a-z0-9]/g, '-').slice(0, 32);
+const quoteId = id || quote.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '').slice(0, 32);
 ---
 
 <div
@@ -126,15 +126,12 @@ const quoteId = id || quote.toLowerCase().replace(/[^a-z0-9]/g, '-').slice(0, 32
   });
 
   // Like Functionality
-  const NAMESPACE = "anime-migi-quotes";
-  
   async function initLikes() {
     const likeButtons = document.querySelectorAll(".like-button");
-    console.log(`[Likes] Initializing ${likeButtons.length} buttons`);
+    console.log(`[Likes] Initializing ${likeButtons.length} buttons via Proxy`);
     
     likeButtons.forEach(async (btn) => {
       const button = btn as HTMLButtonElement;
-      // Prevent multiple initializations
       if (button.dataset.initialized) return;
       button.dataset.initialized = "true";
 
@@ -144,7 +141,6 @@ const quoteId = id || quote.toLowerCase().replace(/[^a-z0-9]/g, '-').slice(0, 32
       const countSpan = button.parentElement?.querySelector(".like-count") as HTMLSpanElement;
       const svg = button.querySelector("svg") as SVGSVGElement;
       
-      // Check if already liked in this session/browser
       const hasLiked = localStorage.getItem(`liked_${quoteId}`);
       if (hasLiked) {
         svg.setAttribute("fill", "currentColor");
@@ -152,47 +148,37 @@ const quoteId = id || quote.toLowerCase().replace(/[^a-z0-9]/g, '-').slice(0, 32
         button.classList.add("bg-red-500/10");
       }
 
-      // Fetch initial count
       async function updateCount(isInitial = false) {
         try {
-          const response = await fetch(`https://api.counterapi.dev/v1/${NAMESPACE}/${quoteId}`);
+          const response = await fetch(`/api/likes/${quoteId}`);
           const data = await response.json();
           
           if (response.ok && data && data.count !== undefined) {
-            // Only update if not just liked (to avoid race conditions with slow API)
             const justLiked = button.dataset.justLiked === "true";
             if (!justLiked || data.count > 0) {
               countSpan.textContent = data.count.toString();
               button.dataset.justLiked = "false";
             }
           } else if (response.status === 400 || response.status === 404) {
-            // Record not found yet, which means 0 likes
             if (countSpan.textContent === "0" || isInitial) {
               countSpan.textContent = "0";
             }
           }
         } catch (err) {
-          console.error(`[Likes] Failed to fetch for ${quoteId}:`, err);
+          console.error(`[Likes Proxy] Failed to fetch for ${quoteId}:`, err);
         }
       }
 
       await updateCount(true);
-      
-      // Polling for updates
       const interval = setInterval(updateCount, 15000);
-      
-      // Cleanup on page change (for Astro View Transitions)
       document.addEventListener('astro:before-preparation', () => clearInterval(interval), { once: true });
 
-      // Handle Click
       button.addEventListener("click", async () => {
         if (localStorage.getItem(`liked_${quoteId}`)) return;
 
-        // Mark as liked locally immediately
         localStorage.setItem(`liked_${quoteId}`, "true");
         button.dataset.justLiked = "true";
 
-        // Optimistic UI update
         const currentCount = parseInt(countSpan.textContent || "0");
         countSpan.textContent = (currentCount + 1).toString();
         svg.setAttribute("fill", "currentColor");
@@ -201,18 +187,16 @@ const quoteId = id || quote.toLowerCase().replace(/[^a-z0-9]/g, '-').slice(0, 32
         
         setTimeout(() => svg.classList.remove("scale-125"), 200);
 
-        // Permanent update via API
         try {
-          const res = await fetch(`https://api.counterapi.dev/v1/${NAMESPACE}/${quoteId}/up`);
-          if (!res.ok) throw new Error(`API returned ${res.status}`);
+          const res = await fetch(`/api/likes/${quoteId}`, { method: 'POST' });
+          if (!res.ok) throw new Error(`Proxy returned ${res.status}`);
           
           const data = await res.json();
           if (data && data.count !== undefined) {
             countSpan.textContent = data.count.toString();
           }
         } catch (err) {
-          console.error(`[Likes] Failed to increment for ${quoteId}:`, err);
-          // Optional: revert UI on failure
+          console.error(`[Likes Proxy] Failed to increment for ${quoteId}:`, err);
         }
       });
     });

@@ -138,9 +138,6 @@ const collabs = await getCollection('collaborations');
         clickReset?: () => void;
     }
 
-    document.addEventListener('astro:page-load', initAudioPlayers);
-    initAudioPlayers();
-
     function initAudioPlayers(): void {
         const containers = document.querySelectorAll('.audio-container');
         let currentActiveAudio: HTMLAudioElement | null = null;
@@ -221,6 +218,9 @@ const collabs = await getCollection('collaborations');
             });
         });
     }
+
+    // Initialize on page load
+    document.addEventListener('astro:page-load', initAudioPlayers);
 </script>
 
 <style>

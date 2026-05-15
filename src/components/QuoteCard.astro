@@ -98,49 +98,48 @@ const quoteId = id || quote.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+
 </div>
 
 <script>
-  function shareQuote(button: HTMLButtonElement) {
-    const quote = button.dataset.quote || "";
-    const author = button.dataset.author || "";
-    const text = `"${quote}" — ${author}`;
+  function setupQuoteCard() {
+    function shareQuote(button: HTMLButtonElement) {
+      const quote = button.dataset.quote || "";
+      const author = button.dataset.author || "";
+      const text = `"${quote}" — ${author}`;
 
-    if (navigator.share) {
-      navigator
-        .share({
-          title: `Quote by ${author}`,
-          text,
-        })
-        .catch(() => {
-          navigator.clipboard.writeText(text);
-        });
-    } else {
-      navigator.clipboard.writeText(text);
-      alert("Teks berhasil disalin ke clipboard!");
+      if (navigator.share) {
+        navigator
+          .share({
+            title: `Quote by ${author}`,
+            text,
+          })
+          .catch(() => {
+            navigator.clipboard.writeText(text);
+          });
+      } else {
+        navigator.clipboard.writeText(text);
+        alert("Teks berhasil disalin ke clipboard!");
+      }
     }
-  }
 
-  const shareButtons = document.querySelectorAll(".share-button");
-  shareButtons.forEach((button) => {
-    button.addEventListener("click", () =>
-      shareQuote(button as HTMLButtonElement),
-    );
-  });
+    const shareButtons = document.querySelectorAll(".share-button");
+    shareButtons.forEach((button) => {
+      button.addEventListener("click", () =>
+        shareQuote(button as HTMLButtonElement),
+      );
+    });
 
-  // Like Functionality
-  async function initLikes() {
+    // Like Functionality
+    const NAMESPACE = "anime-migi-quotes";
+    
     const likeButtons = document.querySelectorAll(".like-button");
-    console.log(`[Likes] Initializing ${likeButtons.length} buttons via Proxy`);
     
     likeButtons.forEach(async (btn) => {
       const button = btn as HTMLButtonElement;
-      if (button.dataset.initialized) return;
-      button.dataset.initialized = "true";
-
       const quoteId = button.dataset.id;
       if (!quoteId) return;
 
       const countSpan = button.parentElement?.querySelector(".like-count") as HTMLSpanElement;
       const svg = button.querySelector("svg") as SVGSVGElement;
       
+      // Check if already liked in this session/browser
       const hasLiked = localStorage.getItem(`liked_${quoteId}`);
       if (hasLiked) {
         svg.setAttribute("fill", "currentColor");
@@ -148,61 +147,57 @@ const quoteId = id || quote.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+
         button.classList.add("bg-red-500/10");
       }
 
-      async function updateCount(isInitial = false) {
+      // Fetch initial count
+      async function updateCount() {
         try {
-          const response = await fetch(`/api/likes/${quoteId}`);
-          const data = await response.json();
-          
-          if (response.ok && data && data.count !== undefined) {
-            const justLiked = button.dataset.justLiked === "true";
-            if (!justLiked || data.count > 0) {
+          const response = await fetch(`https://api.counterapi.dev/v1/${NAMESPACE}/${quoteId}`);
+          if (response.ok) {
+            const data = await response.json();
+            if (data && data.count !== undefined) {
               countSpan.textContent = data.count.toString();
-              button.dataset.justLiked = "false";
             }
-          } else if (response.status === 400 || response.status === 404) {
-            if (countSpan.textContent === "0" || isInitial) {
-              countSpan.textContent = "0";
-            }
+          } else {
+            // If record not found, it's 0
+            countSpan.textContent = "0";
           }
         } catch (err) {
-          console.error(`[Likes Proxy] Failed to fetch for ${quoteId}:`, err);
+          console.error("Failed to fetch likes:", err);
         }
       }
 
-      await updateCount(true);
-      const interval = setInterval(updateCount, 15000);
+      updateCount();
+      // Optional: Poll for live updates every 30s
+      const interval = setInterval(updateCount, 30000);
+      
+      // Cleanup interval on page change (optional but recommended)
       document.addEventListener('astro:before-preparation', () => clearInterval(interval), { once: true });
 
+      // Handle Click
       button.addEventListener("click", async () => {
-        if (localStorage.getItem(`liked_${quoteId}`)) return;
+        if (localStorage.getItem(`liked_${quoteId}`)) {
+          // Already liked - maybe show a message or just do nothing
+          return;
+        }
 
-        localStorage.setItem(`liked_${quoteId}`, "true");
-        button.dataset.justLiked = "true";
-
+        // Optimistic UI update
         const currentCount = parseInt(countSpan.textContent || "0");
         countSpan.textContent = (currentCount + 1).toString();
         svg.setAttribute("fill", "currentColor");
-        svg.classList.add("text-red-500", "scale-125");
+        svg.classList.add("text-red-500");
         button.classList.add("bg-red-500/10");
-        
-        setTimeout(() => svg.classList.remove("scale-125"), 200);
+        localStorage.setItem(`liked_${quoteId}`, "true");
 
+        // Permanent update via API
         try {
-          const res = await fetch(`/api/likes/${quoteId}`, { method: 'POST' });
-          if (!res.ok) throw new Error(`Proxy returned ${res.status}`);
-          
-          const data = await res.json();
-          if (data && data.count !== undefined) {
-            countSpan.textContent = data.count.toString();
-          }
+          await fetch(`https://api.counterapi.dev/v1/${NAMESPACE}/${quoteId}/up`);
         } catch (err) {
-          console.error(`[Likes Proxy] Failed to increment for ${quoteId}:`, err);
+          console.error("Failed to increment likes:", err);
+          // Rollback if failed? (Optional, maybe just leave it)
         }
       });
     });
   }
 
-  // Initialize on load and on each page navigation (Astro View Transitions)
-  initLikes();
-  document.addEventListener('astro:page-load', initLikes);
+  // Initialize on load and on page navigation
+  document.addEventListener('astro:page-load', setupQuoteCard);
 </script>

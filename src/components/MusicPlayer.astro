@@ -39,55 +39,60 @@ import { musicPlayerConfig } from '../config/music';
 <script is:inline src="https://cdn.jsdelivr.net/npm/aplayer/dist/APlayer.min.js"></script>
 
 <script is:inline define:vars={{ musicPlayerConfig }}>
-  let ap = null;
+  if (!window.ap) window.ap = null;
 
-  function initPlayer() {
-    if (typeof APlayer === 'undefined') return;
-    
-    ap = new APlayer({
-      container: document.getElementById('aplayer'),
-      ...musicPlayerConfig.player,
-      audio: musicPlayerConfig.local.playlist
-    });
+  function initMusicPlayer() {
+    function initPlayer() {
+      if (typeof APlayer === 'undefined') return;
+      
+      window.ap = new APlayer({
+        container: document.getElementById('aplayer'),
+        ...musicPlayerConfig.player,
+        audio: musicPlayerConfig.local.playlist
+      });
+    }
+
+    // Handle Modal Toggle
+    const modal = document.getElementById('music-modal');
+    const closeBtn = document.getElementById('close-music-btn');
+    const closeBg = document.getElementById('close-modal-bg');
+
+    window.toggleMusicPlayer = () => {
+      if (!modal) return;
+      const isHidden = modal.classList.contains('hidden');
+      
+      if (isHidden) {
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        if (!window.ap) initPlayer();
+      } else {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+      }
+    };
+
+    window.toggleMute = () => {
+      if (!window.ap) {
+        initPlayer();
+      }
+      
+      const isMuted = window.ap.audio.muted;
+      window.ap.audio.muted = !isMuted;
+      
+      // Dispatch custom event to update UI icons elsewhere
+      window.dispatchEvent(new CustomEvent('music-mute-toggle', { 
+        detail: { muted: !isMuted } 
+      }));
+      
+      return !isMuted;
+    };
+
+    closeBtn?.addEventListener('click', window.toggleMusicPlayer);
+    closeBg?.addEventListener('click', window.toggleMusicPlayer);
   }
 
-  // Handle Modal Toggle
-  const modal = document.getElementById('music-modal');
-  const closeBtn = document.getElementById('close-music-btn');
-  const closeBg = document.getElementById('close-modal-bg');
-
-  window.toggleMusicPlayer = () => {
-    if (!modal) return;
-    const isHidden = modal.classList.contains('hidden');
-    
-    if (isHidden) {
-      modal.classList.remove('hidden');
-      modal.classList.add('flex');
-      if (!ap) initPlayer();
-    } else {
-      modal.classList.add('hidden');
-      modal.classList.remove('flex');
-    }
-  };
-
-  window.toggleMute = () => {
-    if (!ap) {
-      initPlayer();
-    }
-    
-    const isMuted = ap.audio.muted;
-    ap.audio.muted = !isMuted;
-    
-    // Dispatch custom event to update UI icons elsewhere
-    window.dispatchEvent(new CustomEvent('music-mute-toggle', { 
-      detail: { muted: !isMuted } 
-    }));
-    
-    return !isMuted;
-  };
-
-  closeBtn?.addEventListener('click', window.toggleMusicPlayer);
-  closeBg?.addEventListener('click', window.toggleMusicPlayer);
+  // Initialize on page load
+  document.addEventListener('astro:page-load', initMusicPlayer);
 </script>
 
 <style is:global>

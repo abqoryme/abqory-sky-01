@@ -67,44 +67,49 @@ const typeColors = {
 </div>
 
 <script is:inline define:vars={{ updateCount: sortedUpdates.length }}>
-  const modal = document.getElementById('notif-modal');
-  const closeBtn = document.getElementById('close-notif-btn');
-  const closeBg = document.getElementById('close-notif-bg');
-  const navDot = document.getElementById('nav-notif-dot');
-  
-  const STORAGE_KEY = 'last_seen_updates_count';
+  function initNotifModal() {
+    const modal = document.getElementById('notif-modal');
+    const closeBtn = document.getElementById('close-notif-btn');
+    const closeBg = document.getElementById('close-notif-bg');
+    const navDot = document.getElementById('nav-notif-dot');
+    
+    const STORAGE_KEY = 'last_seen_updates_count';
 
-  // Check if there are new updates
-  function checkNewUpdates() {
-    const lastSeenCount = localStorage.getItem(STORAGE_KEY);
-    if (updateCount > 0 && (!lastSeenCount || parseInt(lastSeenCount) < updateCount)) {
-      if (navDot) navDot.classList.remove('hidden');
-    } else {
-      if (navDot) navDot.classList.add('hidden');
+    // Check if there are new updates
+    function checkNewUpdates() {
+      const lastSeenCount = localStorage.getItem(STORAGE_KEY);
+      if (updateCount > 0 && (!lastSeenCount || parseInt(lastSeenCount) < updateCount)) {
+        if (navDot) navDot.classList.remove('hidden');
+      } else {
+        if (navDot) navDot.classList.add('hidden');
+      }
     }
+
+    window.toggleNotifModal = () => {
+      if (!modal) return;
+      const isHidden = modal.classList.contains('hidden');
+      
+      if (isHidden) {
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        // Mark as seen
+        localStorage.setItem(STORAGE_KEY, updateCount.toString());
+        if (navDot) navDot.classList.add('hidden');
+      } else {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+      }
+    };
+
+    closeBtn?.addEventListener('click', window.toggleNotifModal);
+    closeBg?.addEventListener('click', window.toggleNotifModal);
+
+    // Initial check
+    checkNewUpdates();
   }
 
-  window.toggleNotifModal = () => {
-    if (!modal) return;
-    const isHidden = modal.classList.contains('hidden');
-    
-    if (isHidden) {
-      modal.classList.remove('hidden');
-      modal.classList.add('flex');
-      // Mark as seen
-      localStorage.setItem(STORAGE_KEY, updateCount.toString());
-      if (navDot) navDot.classList.add('hidden');
-    } else {
-      modal.classList.add('hidden');
-      modal.classList.remove('flex');
-    }
-  };
-
-  closeBtn?.addEventListener('click', window.toggleNotifModal);
-  closeBg?.addEventListener('click', window.toggleNotifModal);
-
-  // Initial check
-  checkNewUpdates();
+  // Initialize on page load
+  document.addEventListener('astro:page-load', initNotifModal);
 </script>
 
 <style>

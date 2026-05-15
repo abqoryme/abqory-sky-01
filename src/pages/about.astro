@@ -67,15 +67,18 @@ const characterImage = "https://i.pinimg.com/736x/36/22/4d/36224d3bde9798e325637
 				<div class="flex items-center gap-6">
 					<Buttons label="BACK TO HOME" variant="outline" href="/" />
 					<div class="flex gap-4">
-						<div class="w-10 h-10 glass rounded-full flex items-center justify-center cursor-pointer hover:bg-white/20 transition-all">
-							<button onclick="sharePage()" class="w-10 h-10 glass rounded-full flex items-center justify-center cursor-pointer hover:bg-white/20 transition-all">
-								<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 100-2.684 3 3 0 000 2.684zm0 9a3 3 0 100-2.684 3 3 0 000 2.684z" />
-								</svg>
-							</button>
+						<button id="share-page-btn" class="w-10 h-10 glass rounded-full flex items-center justify-center cursor-pointer hover:bg-white/20 transition-all">
+							<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 100-2.684 3 3 0 000 2.684zm0 9a3 3 0 100-2.684 3 3 0 000 2.684z" />
+							</svg>
+						</button>
+					</div>
 
-							<script is:inline>
-								function sharePage() {
+					<script is:inline>
+						function setupAboutPage() {
+							const shareBtn = document.getElementById('share-page-btn');
+							if (shareBtn) {
+								shareBtn.onclick = () => {
 									if (navigator.share) {
 										navigator.share({
 											title: document.title,
@@ -85,10 +88,12 @@ const characterImage = "https://i.pinimg.com/736x/36/22/4d/36224d3bde9798e325637
 										navigator.clipboard.writeText(window.location.href);
 										alert('Link copied to clipboard!');
 									}
-								}
-							</script>
-						</div>
-					</div>
+								};
+							}
+						}
+
+						document.addEventListener('astro:page-load', setupAboutPage);
+					</script>
 				</div>
 			</div>
 		</section>

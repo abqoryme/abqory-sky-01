@@ -28,7 +28,7 @@ function badgeClass(type: string) {
 
 <Layout title="R&D | Ahmad Abqory Mudabighi">
 	<main class="relative min-h-screen w-full flex flex-col items-center overflow-hidden">
-		<ParticleBackground backgroundImage="/api/assets/background-main" />
+		<ParticleBackground backgroundImage={new URL("/api/assets/background-main", Astro.url).href} />
 		<GlowOverlay />
 		<Navbar />
 		<Sidebar />

@@ -10,8 +10,8 @@ import Buttons from '../components/Buttons.astro';
 import TagChip from '../components/TagChip.astro';
 import MusicPlayer from '../components/MusicPlayer.astro';
 
-const focalImage = "/api/assets/focal-character";
-const backgroundImage = "/api/assets/background-main";
+const focalImage = new URL("/api/assets/focal-character", Astro.url).href;
+const backgroundImage = new URL("/api/assets/background-main", Astro.url).href;
 const avatar = "https://i.pinimg.com/736x/36/22/4d/36224d3bde9798e32563708b8dfcbd72.jpg";
 ---
 

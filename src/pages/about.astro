@@ -15,6 +15,10 @@ const characterImage = "https://i.pinimg.com/736x/36/22/4d/36224d3bde9798e325637
 	<main class="relative min-h-screen w-full flex flex-col items-center justify-center overflow-hidden">
 		<ParticleBackground backgroundImage={backgroundImage} />
 		<GlowOverlay />
+
+		<!-- Mobile Overlay for Typography readability -->
+		<div class="absolute inset-0 bg-black/40 lg:hidden z-0"></div>
+
 		<Navbar />
 		<Sidebar />
 
@@ -87,8 +91,7 @@ const characterImage = "https://i.pinimg.com/736x/36/22/4d/36224d3bde9798e325637
 					</div>
 				</div>
 			</div>
-		<!-- Mobile Overlay for Typography readability -->
-		<div class="absolute inset-0 bg-black/40 lg:hidden z-0"></div>
+		</section>
 		
 		<!-- Floating Music Toggle Button -->
 		<div 

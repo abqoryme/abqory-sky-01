@@ -28,7 +28,7 @@ function badgeClass(type: string) {
 
 <Layout title="R&D | Ahmad Abqory Mudabighi">
 	<main class="relative min-h-screen w-full flex flex-col items-center overflow-hidden">
-		<ParticleBackground backgroundImage="https://raw.githubusercontent.com/abqoryme/astro-cv/refs/heads/main/20260513_140801_0000.png" />
+		<ParticleBackground backgroundImage="/api/assets/background-main" />
 		<GlowOverlay />
 		<Navbar />
 		<Sidebar />
@@ -99,56 +99,7 @@ function badgeClass(type: string) {
 			</div>
 		</section>
 	</main>
-
-	<!-- Floating Back to Home Button (Android Only) -->
-	<div id="floating-home-btn" class="fixed bottom-6 right-6 z-50 hidden opacity-0 transition-opacity duration-300">
-		<a href="/" class="w-14 h-14 glass rounded-full flex items-center justify-center shadow-2xl border border-white/20 hover:bg-white/10 transition-all duration-300 group">
-			<svg class="w-6 h-6 text-white/80 group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-			</svg>
-		</a>
-	</div>
 </Layout>
-
-<script>
-	// Floating Home Button for Android Only
-	const floatingBtn = document.getElementById('floating-home-btn') as HTMLElement | null;
-	let hideTimeout: number | undefined;
-
-	function showButton() {
-		if (floatingBtn) {
-			floatingBtn.classList.remove('hidden');
-			floatingBtn.classList.add('opacity-100');
-			resetHideTimer();
-		}
-	}
-
-	function hideButton() {
-		if (floatingBtn) {
-			floatingBtn.classList.remove('opacity-100');
-			setTimeout(() => floatingBtn.classList.add('hidden'), 300);
-		}
-	}
-
-	function resetHideTimer() {
-		if (hideTimeout) {
-			clearTimeout(hideTimeout);
-		}
-		hideTimeout = setTimeout(hideButton, 3000); // Hide after 3 seconds of no interaction
-	}
-
-	// Check if Android and show button
-	if (/Android/i.test(navigator.userAgent)) {
-		showButton();
-
-		// Add touch event listeners to reset timer
-		if (floatingBtn) {
-			floatingBtn.addEventListener('touchstart', resetHideTimer);
-			floatingBtn.addEventListener('touchend', resetHideTimer);
-			floatingBtn.addEventListener('touchmove', resetHideTimer);
-		}
-	}
-</script>
 
 <style>
 	.text-glow {

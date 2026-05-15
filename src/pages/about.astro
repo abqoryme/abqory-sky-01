@@ -5,6 +5,7 @@ import Sidebar from '../components/Sidebar.astro';
 import ParticleBackground from '../components/ParticleBackground.astro';
 import GlowOverlay from '../components/GlowOverlay.astro';
 import Buttons from '../components/Buttons.astro';
+import MusicPlayer from '../components/MusicPlayer.astro';
 
 const backgroundImage = "https://raw.githubusercontent.com/abqoryme/astro-cv/refs/heads/main/20260513_140801_0000.png";
 const characterImage = "https://i.pinimg.com/736x/36/22/4d/36224d3bde9798e32563708b8dfcbd72.jpg";
@@ -86,7 +87,23 @@ const characterImage = "https://i.pinimg.com/736x/36/22/4d/36224d3bde9798e325637
 					</div>
 				</div>
 			</div>
-		</section>
+		<!-- Mobile Overlay for Typography readability -->
+		<div class="absolute inset-0 bg-black/40 lg:hidden z-0"></div>
+		
+		<!-- Floating Music Toggle Button -->
+		<div 
+			class="fixed bottom-6 right-6 z-[100] w-14 h-14 glass rounded-full flex items-center justify-center cursor-pointer hover:bg-white/20 transition-all group animate-float shadow-2xl border border-white/20"
+			onclick="window.toggleMusicPlayer()"
+			title="Toggle Music Player"
+		>
+			<div class="absolute inset-0 rounded-full bg-white/5 animate-ping group-hover:animate-none"></div>
+			<svg class="w-7 h-7 text-white/80 group-hover:scale-110 transition-transform relative z-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
+			</svg>
+		</div>
+
+		<!-- Music Player Popup -->
+		<MusicPlayer />
 	</main>
 </Layout>
 

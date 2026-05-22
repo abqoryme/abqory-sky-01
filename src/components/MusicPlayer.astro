@@ -42,20 +42,34 @@ import { musicPlayerConfig } from '../config/music';
   if (!window.ap) window.ap = null;
 
   function initMusicPlayer() {
-    function initPlayer() {
-      if (typeof APlayer === 'undefined') return;
-      
-      window.ap = new APlayer({
-        container: document.getElementById('aplayer'),
-        ...musicPlayerConfig.player,
-        audio: musicPlayerConfig.local.playlist
-      });
-    }
-
-    // Handle Modal Toggle
     const modal = document.getElementById('music-modal');
     const closeBtn = document.getElementById('close-music-btn');
     const closeBg = document.getElementById('close-modal-bg');
+    const playerContainer = document.getElementById('aplayer');
+
+    function initPlayer() {
+      if (typeof APlayer === 'undefined' || !playerContainer) return;
+      
+      // Jika sudah ada instance tapi di container lama, hancurkan
+      if (window.ap && window.ap.container !== playerContainer) {
+        window.ap.destroy();
+        window.ap = null;
+      }
+
+      if (!window.ap) {
+        window.ap = new APlayer({
+          container: playerContainer,
+          ...musicPlayerConfig.player,
+          audio: musicPlayerConfig.local.playlist
+        });
+        console.log("Music Player Initialized");
+      } else {
+        // Jika sudah ada, refresh playlist sesuai permintaan user (selalu fetch)
+        window.ap.list.clear();
+        window.ap.list.add(musicPlayerConfig.local.playlist);
+        console.log("Music Playlist Refetched/Updated");
+      }
+    }
 
     window.toggleMusicPlayer = () => {
       if (!modal) return;
@@ -64,7 +78,9 @@ import { musicPlayerConfig } from '../config/music';
       if (isHidden) {
         modal.classList.remove('hidden');
         modal.classList.add('flex');
-        if (!window.ap) initPlayer();
+        
+        // Selalu panggil initPlayer (yang akan merefresh playlist) saat dibuka
+        initPlayer();
       } else {
         modal.classList.add('hidden');
         modal.classList.remove('flex');
@@ -76,6 +92,8 @@ import { musicPlayerConfig } from '../config/music';
         initPlayer();
       }
       
+      if (!window.ap) return;
+
       const isMuted = window.ap.audio.muted;
       window.ap.audio.muted = !isMuted;
       
